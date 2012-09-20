@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.ServiceManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageEventListener;
@@ -67,6 +68,8 @@ public class Memory extends SettingsPreferenceFragment {
 
     private StorageVolumePreferenceCategory mInternalStorageVolumePreferenceCategory;
     private StorageVolumePreferenceCategory[] mStorageVolumePreferenceCategories;
+
+    private final boolean mHasSwitchableStorage = !SystemProperties.get("ro.vold.switchablepair","").isEmpty();
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -171,6 +174,12 @@ public class Memory extends SettingsPreferenceFragment {
     public void onPrepareOptionsMenu(Menu menu) {
         final MenuItem usb = menu.findItem(R.id.storage_usb);
         usb.setVisible(!isMassStorageEnabled());
+		
+        final MenuItem storage = menu.findItem(R.id.storage_storage);
+        usb.setVisible(true);
+        if (mHasSwitchableStorage) {
+            storage.setVisible(true);
+        }
     }
 
     @Override
@@ -185,6 +194,17 @@ public class Memory extends SettingsPreferenceFragment {
                             this, 0);
                 } else {
                     startFragment(this, UsbSettings.class.getCanonicalName(), -1, null);
+                }
+                return true;
+            case R.id.storage_storage:
+                if (getActivity() instanceof PreferenceActivity) {
+                    ((PreferenceActivity) getActivity()).startPreferencePanel(
+                            StorageSettings.class.getCanonicalName(),
+                            null,
+                            R.string.storage_title_storage, null,
+                            this, 0);
+                } else {
+                    startFragment(this, StorageSettings.class.getCanonicalName(), -1, null);
                 }
                 return true;
         }

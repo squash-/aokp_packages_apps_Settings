@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!-- Copyright (C) 2012 The CyanogenMod Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,11 +14,15 @@
      limitations under the License.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/storage_usb"
-        android:title="@string/storage_menu_usb" />
-    <item
-        android:id="@+id/storage_storage"
-        android:title="@string/storage_menu_storage" />
-</menu>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/location_settings_title">
+
+    <PreferenceCategory
+            android:title="@string/storage_layout" />
+
+    <CheckBoxPreference android:key="pref_switch_storage"
+        android:title="@string/storage_switch_title"
+        android:summaryOn="@string/storage_switch_summary_on"
+        android:summaryOff="@string/storage_switch_summary_off" />
+
+</PreferenceScreen>
