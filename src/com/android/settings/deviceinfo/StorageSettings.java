@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.SystemProperties;
 import android.preference.CheckBoxPreference;
@@ -36,6 +37,8 @@ import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.Utils;
 
+import java.io.*;
+
 /**
  * Generic storage settings.
  */
@@ -47,6 +50,13 @@ public class StorageSettings extends SettingsPreferenceFragment {
 
     private CheckBoxPreference mSwitchStoragePref;
 
+    private static final String STORAGEFILE = "/data/system/storage.rc";
+
+    private static final File f = new File(STORAGEFILE);
+
+    private final boolean mHasSwitchableStorage = Resources.getSystem()
+                          .getBoolean(com.android.internal.R.bool.config_hasSwitchableStorage);
+
     private PreferenceScreen createPreferenceHierarchy() {
         PreferenceScreen root = getPreferenceScreen();
         if (root != null) {
@@ -56,9 +66,9 @@ public class StorageSettings extends SettingsPreferenceFragment {
         root = getPreferenceScreen();
 
         mSwitchStoragePref = (CheckBoxPreference) root.findPreference(SWITCH_STORAGE_PREF);
-        mSwitchStoragePref.setChecked((SystemProperties.getInt("persist.sys.vold.switchexternal", 0) == 1));
+        mSwitchStoragePref.setChecked((SystemProperties.getInt("persist.sys.init.switchstorage", 0) == 1));
 
-        if (SystemProperties.get("ro.vold.switchablepair","").equals("")) {
+        if (!mHasSwitchableStorage) {
             mSwitchStoragePref.setSummary(R.string.storage_switch_unavailable);
             mSwitchStoragePref.setEnabled(false);
         }
@@ -94,8 +104,53 @@ public class StorageSettings extends SettingsPreferenceFragment {
             return true;
         }
         if (preference == mSwitchStoragePref) {
-            SystemProperties.set("persist.sys.vold.switchexternal",
+            SystemProperties.set("persist.sys.init.switchstorage",
                mSwitchStoragePref.isChecked() ? "1" : "0");
+        }
+
+        if (mHasSwitchableStorage) {
+            if (!f.exists()) {
+                Log.d (TAG, "storage.rc doesn't exist. creating");
+                try {
+                   f.createNewFile();
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+             } else {
+                Log.d (TAG, "storage.rc exists. Leaving alone");
+             }
+        }
+
+        if ("1".equals(SystemProperties.get("persist.sys.init.switchstorage"))) {
+            Log.d (TAG, "Storage Switcher PoC Enabled");
+            try {
+                   Log.d (TAG, "Attempting to write to storage.rc");
+                   BufferedWriter output;
+                   output = new BufferedWriter(new FileWriter(STORAGEFILE));
+                   output.write("export PHONE_STORAGE /storage/sdcard1");
+                   output.close();
+                   output = new BufferedWriter(new FileWriter(STORAGEFILE, true));
+                   output.newLine();
+                   output.append("export EXTERNAL_STORAGE /storage/sdcard0");
+                   output.close();
+            } catch(IOException e) {
+                   e.printStackTrace();
+            }
+        } else {
+            Log.d (TAG, "Storage Switcher PoC Disabled");
+            try {
+                   Log.d (TAG, "Attempting to write to storage.rc");
+                   BufferedWriter output;
+                   output = new BufferedWriter(new FileWriter(STORAGEFILE));
+                   output.write("export PHONE_STORAGE /storage/sdcard0");
+                   output.close();
+                   output = new BufferedWriter(new FileWriter(STORAGEFILE, true));
+                   output.newLine();
+                   output.append("export EXTERNAL_STORAGE /storage/sdcard1");
+                   output.close();
+            } catch(IOException e) {
+                   e.printStackTrace();
+            }
         }
         return true;
     }
