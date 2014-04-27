@@ -68,8 +68,6 @@ public class Memory extends SettingsPreferenceFragment {
     private StorageVolumePreferenceCategory mInternalStorageVolumePreferenceCategory;
     private StorageVolumePreferenceCategory[] mStorageVolumePreferenceCategories;
 
-    private final boolean mHasSwitchableStorage = Resources.getSystem()
-                          .getBoolean(com.android.internal.R.bool.config_hasSwitchableStorage);
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -173,12 +171,6 @@ public class Memory extends SettingsPreferenceFragment {
     public void onPrepareOptionsMenu(Menu menu) {
         final MenuItem usb = menu.findItem(R.id.storage_usb);
         usb.setVisible(!isMassStorageEnabled());
-
-        final MenuItem storage = menu.findItem(R.id.storage_storage);
-        usb.setVisible(true);
-        if (mHasSwitchableStorage) {
-            storage.setVisible(true);
-        }
     }
 
     @Override
@@ -193,17 +185,6 @@ public class Memory extends SettingsPreferenceFragment {
                             this, 0);
                 } else {
                     startFragment(this, UsbSettings.class.getCanonicalName(), -1, null);
-                }
-                return true;
-            case R.id.storage_storage:
-                if (getActivity() instanceof PreferenceActivity) {
-                    ((PreferenceActivity) getActivity()).startPreferencePanel(
-                            StorageSettings.class.getCanonicalName(),
-                            null,
-                            R.string.storage_title_storage, null,
-                            this, 0);
-                } else {
-                    startFragment(this, StorageSettings.class.getCanonicalName(), -1, null);
                 }
                 return true;
         }
