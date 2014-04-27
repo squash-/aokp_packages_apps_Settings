@@ -54,6 +54,10 @@ public class StorageSettings extends SettingsPreferenceFragment {
 
     private static final File f = new File(STORAGEFILE);
 
+    private String EXTERNAL_STORAGE = System.getenv("EXTERNAL_STORAGE");
+
+    private String SECONDARY_STORAGE = System.getenv("SECONDARY_STORAGE");
+
     private final boolean mHasSwitchableStorage = Resources.getSystem()
                           .getBoolean(com.android.internal.R.bool.config_hasSwitchableStorage);
 
@@ -127,11 +131,13 @@ public class StorageSettings extends SettingsPreferenceFragment {
                    Log.d (TAG, "Attempting to write to storage.rc");
                    BufferedWriter output;
                    output = new BufferedWriter(new FileWriter(STORAGEFILE));
-                   output.write("export PHONE_STORAGE /storage/sdcard1");
+                   Log.d (TAG, "Writing External Storage env var as " + SECONDARY_STORAGE);
+                   output.write("export EXTERNAL_STORAGE " + SECONDARY_STORAGE);
                    output.close();
                    output = new BufferedWriter(new FileWriter(STORAGEFILE, true));
                    output.newLine();
-                   output.append("export EXTERNAL_STORAGE /storage/sdcard0");
+                   Log.d (TAG, "Writing Secondary Storage env var as " + EXTERNAL_STORAGE);
+                   output.append("export SECONDARY_STORAGE " + EXTERNAL_STORAGE);
                    output.close();
             } catch(IOException e) {
                    e.printStackTrace();
@@ -142,11 +148,13 @@ public class StorageSettings extends SettingsPreferenceFragment {
                    Log.d (TAG, "Attempting to write to storage.rc");
                    BufferedWriter output;
                    output = new BufferedWriter(new FileWriter(STORAGEFILE));
-                   output.write("export PHONE_STORAGE /storage/sdcard0");
+                   Log.d (TAG, "Writing External Storage env var as sdcard0");
+                   output.write("export EXTERNAL_STORAGE /storage/sdcard0");
                    output.close();
                    output = new BufferedWriter(new FileWriter(STORAGEFILE, true));
                    output.newLine();
-                   output.append("export EXTERNAL_STORAGE /storage/sdcard1");
+                   Log.d (TAG, "Writing Secondary Storage env var as sdcard1");
+                   output.append("export SECONDARY_STORAGE /storage/sdcard1");
                    output.close();
             } catch(IOException e) {
                    e.printStackTrace();
